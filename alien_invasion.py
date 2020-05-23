@@ -11,8 +11,9 @@ class AlienInvasion:
         """Инициализирует игру и создает игровые ресурсы"""
         pygame.init()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode(
-            (self.settings.screen_widht, self.settings.screen_height))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.settings.screen_width = self.screen.get_rect().width
+        self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
         # Назначение цвета фона
         self.bg_color = self.settings.bg_color
@@ -21,17 +22,43 @@ class AlienInvasion:
     def run_game(self):
         """Запуск основного цикла игры"""
         while True:
-            # Отслеживание событий клавиатуры и мыши
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+            self._check_events()
+            self.ship.update()
+            self._update_screen()
 
-            # При каждом проходе цикла перерисовывается экран
-            self.screen.fill(self.bg_color)
-            self.ship.blitme()
+    def _check_events(self):
+        """Обрабатывает нажатия клавиш и события мыши"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                self._check_keydown_events(event)
+            elif event.type == pygame.KEYUP:
+                self._check_keyup_events(event)
 
-            # Отображение последнего отрисованного экрана
-            pygame.display.flip()
+    def _check_keydown_events(self, event):
+        """Реагирует на нажитие клавиш"""
+        if event.key == pygame.K_RIGHT:
+            # переместить корабль вправо
+            self.ship.moving_right = True
+        if event.key == pygame.K_LEFT:
+            # переместить корабль влево
+            self.ship.moving_left = True
+        if event.key == pygame.K_q:
+            sys.exit()
+
+    def _check_keyup_events(self, event):
+        """Реагирует на отпускание клавиш"""
+        if event.key == pygame.K_RIGHT:
+            self.ship.moving_right = False
+        if event.key == pygame.K_LEFT:
+            self.ship.moving_left = False
+
+    def _update_screen(self):
+        """Обновляет изображение на экране и отображает новый экран"""
+        self.screen.fill(self.bg_color)
+        self.ship.blitme()
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
