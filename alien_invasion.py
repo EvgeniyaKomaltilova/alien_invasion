@@ -58,6 +58,8 @@ class AlienInvasion:
         """Запускает новую игру при нажатии кнопки PLAY"""
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.stats.game_active:
+            # Сброс игровых настроек
+            self.settings.initialize_dynamic_settings()
             # Сброс игровой статистики
             self.stats.reset_stats()
             self.stats.game_active = True
@@ -115,6 +117,7 @@ class AlienInvasion:
             # Уничтожение существующих снарядов и создание нового флота
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _update_aliens(self):
         """Проверяет, достиг ли флот края экрана и
@@ -157,7 +160,7 @@ class AlienInvasion:
         # Создание пришельца и вычисление количества пришельцев в ряду
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
-        available_space_x = self.settings.screen_widht - (2 * alien_width)
+        available_space_x = self.settings.screen_width - (2 * alien_width)
         number_aliens_x = available_space_x // (2 * alien_width)
 
         # Определяет количество рядов, помещающихся на экране
