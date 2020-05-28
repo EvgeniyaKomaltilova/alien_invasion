@@ -3,6 +3,7 @@ from time import sleep
 import pygame
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import Scoreboard
 from button import Button
 from ship import Ship
 from bullet import Bullet
@@ -20,8 +21,9 @@ class AlienInvasion:
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
-        # Создание экземпляра для хранения игровой статистики
+        # Хранение статистики и панели результатов
         self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
         # Назначение цвета фона
         self.bg_color = self.settings.bg_color
         self.ship = Ship(self)
@@ -63,6 +65,7 @@ class AlienInvasion:
             # Сброс игровой статистики
             self.stats.reset_stats()
             self.stats.game_active = True
+            self.sb.prep_score()
             # Очистка списка пришельцев и снарядов
             self.aliens.empty()
             self.bullets.empty()
@@ -113,6 +116,10 @@ class AlienInvasion:
         # Удаление снарядов и пришельцев, участвующих в коллизиях
         collisions = pygame.sprite.groupcollide(
             self.bullets, self.aliens, True, True)
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
         if not self.aliens:
             # Уничтожение существующих снарядов и создание нового флота
             self.bullets.empty()
@@ -203,6 +210,8 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
+        # Вывод информации о счете
+        self.sb.show_score()
         # Кнопка PLAY отображается, когда игра неактивна
         if not self.stats.game_active:
             self.play_button.draw_button()
